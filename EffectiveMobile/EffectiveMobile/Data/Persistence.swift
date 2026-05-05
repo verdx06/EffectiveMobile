@@ -1,0 +1,28 @@
+import CoreData
+
+struct PersistenceController {
+    static let shared = PersistenceController(inMemory: ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil)
+
+    static let preview: PersistenceController = {
+        let result = PersistenceController(inMemory: true)
+        return result
+    }()
+
+    let container: NSPersistentContainer
+
+    init(inMemory: Bool = false) {
+        container = NSPersistentContainer(name: "EffectiveMobileTest")
+        
+        if inMemory {
+            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+        }
+        
+        container.loadPersistentStores { _, error in
+            if let error = error as NSError? {
+                fatalError("Unresolved error \(error), \(error.userInfo)")
+            }
+        }
+        
+        container.viewContext.automaticallyMergesChangesFromParent = true
+    }
+}
